@@ -5,9 +5,21 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "repak"
 version = "0.1.0"
-description = "Transfer a local directory across a network boundary via a synthetic PyPI wheel"
+description = "Transfer a local directory across a network boundary by packaging it as a synthetic PyPI wheel"
+readme = "README.md"
 requires-python = ">=3.9"
+license = { text = "MIT" }
+keywords = ["pypi", "wheel", "transport", "airgap", "mirror"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: System :: Archiving :: Packaging",
+    "Topic :: System :: Software Distribution",
+]
 dependencies = ["twine>=4.0"]
+
+[project.urls]
+Repository = "https://github.com/dlfelps/repak"
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0"]
