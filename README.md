@@ -1,13 +1,11 @@
 # repak
 
-Transfer the contents of a local directory across a network boundary by
-packaging it as a PyPI wheel.
+Package a local directory as a PyPI wheel, publish it, and reproduce it
+elsewhere with a single `pip install`.
 
-Some environments are isolated from the public internet but mirror PyPI
-automatically into the isolated side. `repak` abuses that channel as a
-transport: it packs a directory into a **synthetic wheel**, you upload it to
-public PyPI, the internal mirror replicates it, and on the far side
-`pip install` + a generated `unpak-*` command reproduces the directory.
+`repak` packs a directory into a **synthetic wheel**, uploads it to PyPI, and
+generates a self-contained `unpak-*` command that reproduces the directory on
+any machine that can run `pip install`.
 
 > Only transfer public-domain data. `repak` does not and cannot enforce this —
 > it is your responsibility.
