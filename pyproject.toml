@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "repak"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Transfer a local directory across a network boundary by packaging it as a synthetic PyPI wheel"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -26,6 +26,9 @@ dev = ["pytest>=7.0"]
 
 [project.scripts]
 repak = "repak.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "repak.__version__" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
