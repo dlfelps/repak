@@ -1,2 +1,0 @@
-[console_scripts]
-repak = repak.cli:main

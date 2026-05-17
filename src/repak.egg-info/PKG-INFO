@@ -1,8 +1,0 @@
-Metadata-Version: 2.4
-Name: repak
-Version: 0.1.0
-Summary: Transfer a local directory across a network boundary via a synthetic PyPI wheel
-Requires-Python: >=3.9
-Requires-Dist: twine>=4.0
-Provides-Extra: dev
-Requires-Dist: pytest>=7.0; extra == "dev"
