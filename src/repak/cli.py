@@ -8,7 +8,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from . import naming, pypi, versioning
+from . import naming, pypi, snippet, versioning
 from .archive import build_archive
 from .wheel import WheelTooLarge, build_wheel
 
@@ -128,13 +128,21 @@ def main(argv=None) -> int:
             sys.stderr.write(f"ERROR: {exc}\n")
             return 1
 
-    script = naming.console_script(source.name)
+    pkg = naming.module_name(source.name)
+    pinned = snippet.pinned_run(pypi_name, pkg, version, archive.sha256)
+    latest = snippet.latest_run(pypi_name, pkg)
+
     print(
         f"\nUploaded {pypi_name} {version} to public PyPI.\n"
-        "Note: propagation to the internal mirror is NOT immediate; there is "
-        "an unknown sync lag before it becomes installable in the isolated "
-        "environment.\n"
-        f"Once available: pip install {pypi_name} && {script} /target/folder"
+        "\nAdd one of these to your Dockerfile "
+        "(replace /your/destination with your target path):\n"
+        "\n  --- Pinned (recommended for production) ---\n"
+        f"{pinned}\n"
+        "\n  --- Always latest (every rebuild pulls newest) ---\n"
+        f"{latest}\n"
+        "\nRequires curl and unzip in your base image.\n"
+        "  Alpine: RUN apk add -q curl unzip\n"
+        "  Debian: RUN apt-get install -y --no-install-recommends curl unzip"
     )
     return 0
 
