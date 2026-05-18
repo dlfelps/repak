@@ -139,6 +139,10 @@ def main(argv=None) -> int:
             return 1
 
     pkg = naming.module_name(source.name)
+    script = naming.console_script(source.name)
+    pip = snippet.pip_consumer(
+        pypi_name, script, version, index_url=args.index_url
+    )
     pinned = snippet.pinned_run(
         pypi_name, pkg, version, archive.sha256, index_url=args.index_url
     )
@@ -146,13 +150,16 @@ def main(argv=None) -> int:
 
     print(
         f"\nUploaded {pypi_name} {version} to {target}.\n"
-        "\nAdd one of these to your Dockerfile "
+        "\nConsume it one of two ways "
         "(replace /your/destination with your target path):\n"
+        "\n=== With pip (no Docker, no clone) ===\n"
+        f"{pip}\n"
+        "\n=== Without pip (Docker base image with no Python) ===\n"
         "\n  --- Pinned (recommended for production) ---\n"
         f"{pinned}\n"
         "\n  --- Always latest (every rebuild pulls newest) ---\n"
         f"{latest}\n"
-        "\nRequires curl and unzip in your base image.\n"
+        "\nThe Docker snippets require curl and unzip in your base image.\n"
         "  Alpine: RUN apk add -q curl unzip\n"
         "  Debian: RUN apt-get install -y --no-install-recommends curl unzip"
     )

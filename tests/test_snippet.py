@@ -5,8 +5,44 @@ from repak import snippet
 
 PYPI_NAME = "repak-my-configs"
 PKG = "repak_my_configs"
+SCRIPT = "unpak-my-configs"
 VERSION = "0.3"
 SHA256 = "a" * 64
+
+
+def test_pip_consumer_contains_pypi_name_and_script():
+    out = snippet.pip_consumer(PYPI_NAME, SCRIPT, VERSION)
+    assert PYPI_NAME in out
+    assert SCRIPT in out
+
+
+def test_pip_consumer_has_latest_and_pinned():
+    out = snippet.pip_consumer(PYPI_NAME, SCRIPT, VERSION)
+    assert "pip install -U" in out
+    assert f"{PYPI_NAME}=={VERSION}" in out
+
+
+def test_pip_consumer_default_dest_is_placeholder():
+    out = snippet.pip_consumer(PYPI_NAME, SCRIPT, VERSION)
+    assert snippet.DEST_PLACEHOLDER in out
+
+
+def test_pip_consumer_custom_dest():
+    out = snippet.pip_consumer(PYPI_NAME, SCRIPT, VERSION, dest="/srv/app")
+    assert "/srv/app" in out
+    assert snippet.DEST_PLACEHOLDER not in out
+
+
+def test_pip_consumer_default_index_has_no_index_url_flag():
+    out = snippet.pip_consumer(PYPI_NAME, SCRIPT, VERSION)
+    assert "--index-url" not in out
+
+
+def test_pip_consumer_private_index_adds_index_url_flag():
+    out = snippet.pip_consumer(
+        PYPI_NAME, SCRIPT, VERSION, index_url="https://pypi.internal/simple"
+    )
+    assert "--index-url https://pypi.internal/simple" in out
 
 
 def test_pinned_run_contains_version():
