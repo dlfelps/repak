@@ -156,8 +156,9 @@ repak --path /path/to/folder --yes
 
 The PyPI package name is derived from the directory name as `repak-{folder}`,
 and the extractor entry point is `unpak-{folder}`. After a successful upload
-repak prints the two Dockerfile snippets with the correct package name and
-sha256 already filled in.
+repak prints **all** consumer commands — the pip `install`/`unpak` pair and
+both Dockerfile snippets — with the correct package name and sha256 already
+filled in.
 
 ### pip consumers (no Docker)
 

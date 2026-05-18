@@ -10,6 +10,32 @@ def _index(index_url: str, pypi_name: str) -> str:
     return f"{index_url.rstrip('/')}/{pypi_name}/"
 
 
+def pip_consumer(
+    pypi_name: str,
+    console_script: str,
+    version: str,
+    dest: str = DEST_PLACEHOLDER,
+    index_url: str = DEFAULT_INDEX_URL,
+) -> str:
+    """Return the no-Docker consumer commands: pip install then unpak.
+
+    Needs only pip on the destination; repak itself is not installed there.
+    ``unpak-{name}`` verifies the SHA-256 before writing anything.
+    """
+    extra = ""
+    if index_url.rstrip("/") != DEFAULT_INDEX_URL:
+        extra = f" --index-url {index_url.rstrip('/')}"
+    return (
+        f"# latest — re-run pip install -U to pull newer uploads\n"
+        f"pip install -U{extra} {pypi_name}\n"
+        f"{console_script} {dest}\n"
+        f"\n"
+        f"# pinned at {version} — reproducible\n"
+        f"pip install{extra} {pypi_name}=={version}\n"
+        f"{console_script} {dest}"
+    )
+
+
 def pinned_run(
     pypi_name: str,
     pkg: str,
