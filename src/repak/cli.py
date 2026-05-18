@@ -54,6 +54,19 @@ def _parse_args(argv):
         action="store_true",
         help="Skip confirmation prompts (for non-interactive use).",
     )
+    parser.add_argument(
+        "--repository-url",
+        default=None,
+        help="Upload target for twine (default: public PyPI). Set this to a "
+        "private index URL to keep bundles off public PyPI.",
+    )
+    parser.add_argument(
+        "--index-url",
+        default=snippet.DEFAULT_INDEX_URL,
+        help="Simple-index base URL baked into the generated Docker snippets "
+        f"(default: {snippet.DEFAULT_INDEX_URL}). Point this at your private "
+        "mirror's simple index when using --repository-url.",
+    )
     return parser.parse_args(argv)
 
 
@@ -82,11 +95,7 @@ def main(argv=None) -> int:
         )
         return 1
 
-    try:
-        version = versioning.next_version(info.versions if info.exists else None)
-    except versioning.VersionExhausted as exc:
-        sys.stderr.write(f"ERROR: {exc}\n")
-        return 1
+    version = versioning.next_version(info.versions if info.exists else None)
 
     if not info.exists:
         print(f"Creating new package {pypi_name} at version {version}")
@@ -118,22 +127,25 @@ def main(argv=None) -> int:
             f"Built wheel {wheel.filename} "
             f"({wheel.size / (1024 * 1024):.2f} MiB)"
         )
-        if not _confirm(f"Upload {wheel.filename} to public PyPI?", args.yes):
+        target = args.repository_url or "public PyPI"
+        if not _confirm(f"Upload {wheel.filename} to {target}?", args.yes):
             print("Aborted.")
             return 1
 
         try:
-            pypi.upload(wheel.path, token)
+            pypi.upload(wheel.path, token, repository_url=args.repository_url)
         except pypi.UploadError as exc:
             sys.stderr.write(f"ERROR: {exc}\n")
             return 1
 
     pkg = naming.module_name(source.name)
-    pinned = snippet.pinned_run(pypi_name, pkg, version, archive.sha256)
-    latest = snippet.latest_run(pypi_name, pkg)
+    pinned = snippet.pinned_run(
+        pypi_name, pkg, version, archive.sha256, index_url=args.index_url
+    )
+    latest = snippet.latest_run(pypi_name, pkg, index_url=args.index_url)
 
     print(
-        f"\nUploaded {pypi_name} {version} to public PyPI.\n"
+        f"\nUploaded {pypi_name} {version} to {target}.\n"
         "\nAdd one of these to your Dockerfile "
         "(replace /your/destination with your target path):\n"
         "\n  --- Pinned (recommended for production) ---\n"

@@ -1,6 +1,10 @@
-"""Version scheme: 0.N where N is an integer 1..99.
+"""Version scheme: ``MAJOR.MINOR`` where MINOR is 0..99 and MAJOR is unbounded.
 
-Sequence: 0.1, 0.2, ... 0.9, 0.10, 0.11, ... 0.99 (99 uploads per package).
+Sequence: 0.1, 0.2, ... 0.9, 0.10, ... 0.99, 1.0, 1.1, ... 1.99, 2.0, ...
+
+Internally a version maps to an integer ``n = MAJOR * 100 + MINOR``. The first
+upload is ``0.1`` (``n = 1``); each subsequent upload increments ``n`` by one
+and rolls the minor into the major at 100. There is no upper bound.
 """
 
 from __future__ import annotations
@@ -8,40 +12,43 @@ from __future__ import annotations
 import re
 from typing import Iterable, Optional
 
-_VERSION_RE = re.compile(r"^0\.(\d+)$")
+_VERSION_RE = re.compile(r"^(\d+)\.(\d+)$")
 
-MIN_MINOR = 1
-MAX_MINOR = 99
+MIN_N = 1
+_MINOR_BASE = 100
 
 
-class VersionExhausted(RuntimeError):
-    """Raised when the 0.99 ceiling has been reached for a package."""
+def _to_n(major: int, minor: int) -> int:
+    return major * _MINOR_BASE + minor
+
+
+def _to_version(n: int) -> str:
+    return f"{n // _MINOR_BASE}.{n % _MINOR_BASE}"
 
 
 def next_version(existing: Optional[Iterable[str]]) -> str:
-    """Return the next ``0.N`` version string.
+    """Return the next ``MAJOR.MINOR`` version string.
 
     ``None`` or an empty iterable means the package does not exist yet, so
-    versioning starts at ``0.1``. Otherwise the next version is one greater
-    than the highest ``0.N`` already published; non-conforming version
-    strings are ignored.
+    versioning starts at ``0.1``. Otherwise the next version is one step past
+    the highest already published; minor wraps into major at 100 (``0.99`` is
+    followed by ``1.0``). Version strings with a minor of 100 or more, or that
+    do not match ``MAJOR.MINOR``, are ignored.
     """
     if not existing:
-        return f"0.{MIN_MINOR}"
+        return _to_version(MIN_N)
 
-    minors = [
-        int(m.group(1))
-        for m in (_VERSION_RE.match(v.strip()) for v in existing)
-        if m is not None
-    ]
-    if not minors:
-        return f"0.{MIN_MINOR}"
+    ns = []
+    for v in existing:
+        m = _VERSION_RE.match(v.strip())
+        if m is None:
+            continue
+        major, minor = int(m.group(1)), int(m.group(2))
+        if minor >= _MINOR_BASE:
+            continue
+        ns.append(_to_n(major, minor))
 
-    current = max(minors)
-    nxt = current + 1
-    if nxt > MAX_MINOR:
-        raise VersionExhausted(
-            f"package has reached the maximum version 0.{MAX_MINOR}; "
-            "no further uploads are possible under this package name"
-        )
-    return f"0.{nxt}"
+    if not ns:
+        return _to_version(MIN_N)
+
+    return _to_version(max(ns) + 1)

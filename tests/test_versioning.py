@@ -1,5 +1,3 @@
-import pytest
-
 from repak import versioning
 
 
@@ -22,10 +20,19 @@ def test_picks_max_existing():
 
 
 def test_non_conforming_versions_ignored():
-    assert versioning.next_version(["1.0", "0.0.1", "garbage"]) == "0.1"
-    assert versioning.next_version(["1.0", "0.5"]) == "0.6"
+    # Three-part and non-numeric strings are not MAJOR.MINOR and are skipped.
+    assert versioning.next_version(["0.0.1", "garbage"]) == "0.1"
+    # A minor of 100 or more is out of range and ignored.
+    assert versioning.next_version(["0.100", "0.5"]) == "0.6"
 
 
-def test_ceiling_raises():
-    with pytest.raises(versioning.VersionExhausted):
-        versioning.next_version(["0.99"])
+def test_minor_rolls_into_major_at_100():
+    assert versioning.next_version(["0.99"]) == "1.0"
+    assert versioning.next_version(["1.0"]) == "1.1"
+    assert versioning.next_version(["1.99"]) == "2.0"
+
+
+def test_no_ceiling():
+    # The scheme is unbounded; high majors keep incrementing.
+    assert versioning.next_version(["7.42"]) == "7.43"
+    assert versioning.next_version(["0.3", "2.10", "1.5"]) == "2.11"
