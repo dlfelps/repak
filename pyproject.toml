@@ -5,11 +5,11 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "repak"
 dynamic = ["version"]
-description = "Transfer a local directory across a network boundary by packaging it as a synthetic PyPI wheel"
+description = "Bundle a public directory once as a versioned, checksum-verified PyPI wheel — share Docker build assets, project scaffolds, and tool config that consumers pull with just pip or curl"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
-keywords = ["pypi", "wheel", "transport", "airgap", "mirror"]
+keywords = ["pypi", "wheel", "scaffold", "docker", "tool-config", "bundle", "distribution"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
