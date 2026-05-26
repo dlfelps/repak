@@ -4,7 +4,7 @@ import zipfile
 
 import pytest
 
-from repak import wheel
+from repak import __version__, wheel
 from repak.archive import build_archive
 
 
@@ -31,6 +31,11 @@ def test_wheel_structure(sample_tree, tmp_path):
         meta = zf.read("repak_myproject-0.1.dist-info/METADATA").decode()
         assert "Name: repak-myproject" in meta
         assert f"Keywords: {wheel.MARKER}" in meta
+
+        wheel_meta = zf.read(
+            "repak_myproject-0.1.dist-info/WHEEL"
+        ).decode()
+        assert f"Generator: repak ({__version__})" in wheel_meta
 
         payload = zf.read("repak_myproject/payload.tar.gz")
         assert payload == arc.data
