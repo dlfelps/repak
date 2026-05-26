@@ -10,7 +10,7 @@ from importlib import resources
 from pathlib import Path
 from typing import Dict
 
-from . import naming
+from . import __version__, naming
 from .archive import Archive
 from .unpak_template import CHECKSUM, PAYLOAD
 
@@ -70,7 +70,7 @@ def build_wheel(
     )
     wheel_meta = (
         "Wheel-Version: 1.0\n"
-        "Generator: repak\n"
+        f"Generator: repak ({__version__})\n"
         "Root-Is-Purelib: true\n"
         "Tag: py3-none-any\n"
     )
