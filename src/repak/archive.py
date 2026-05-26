@@ -13,6 +13,26 @@ from typing import List
 
 VCS_DIRS = {".git", ".hg", ".svn", ".bzr"}
 
+# Generated/transient directories that are virtually never intended to be
+# shipped: virtualenvs, language package caches, and tool caches. Pruned by
+# default so a stray `.venv` doesn't add tens of MB (and a self-extracting
+# `python.exe` that can't overwrite itself on Windows) to every bundle.
+JUNK_DIRS = {
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".tox",
+    "node_modules",
+    ".venv",
+    "venv",
+}
+
+# Per-file junk that shows up regardless of directory layout.
+JUNK_FILES = {".DS_Store"}
+
+_PRUNED_DIRS = VCS_DIRS | JUNK_DIRS
+
 # Fixed timestamp so identical trees produce identical archives (helps make
 # uploads/tests reproducible). 2020-01-01 UTC.
 _FIXED_MTIME = 1577836800
@@ -28,9 +48,11 @@ class Archive:
 def _iter_files(root: Path) -> List[Path]:
     collected: List[Path] = []
     for dirpath, dirnames, filenames in os.walk(root):
-        # Prune VCS directories in-place so os.walk does not descend.
-        dirnames[:] = sorted(d for d in dirnames if d not in VCS_DIRS)
+        # Prune VCS + junk directories in-place so os.walk does not descend.
+        dirnames[:] = sorted(d for d in dirnames if d not in _PRUNED_DIRS)
         for name in sorted(filenames):
+            if name in JUNK_FILES:
+                continue
             collected.append(Path(dirpath) / name)
     return collected
 
