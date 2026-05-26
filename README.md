@@ -256,8 +256,11 @@ answer for private data.
 2. PyPI is queried; a new package starts at `0.1`, an existing repak package
    is bumped. The minor wraps into the major at 100 (`0.99` is followed by
    `1.0`), so there is no upload ceiling. You confirm before overwriting.
-3. The directory **contents** are tarred (`.git`/`.hg`/`.svn`/`.bzr`
-   excluded), gzipped, and SHA-256'd.
+3. The directory **contents** are tarred, gzipped, and SHA-256'd. VCS
+   directories (`.git`/`.hg`/`.svn`/`.bzr`) and common generated/cache dirs
+   (`.venv`, `venv`, `__pycache__`, `.pytest_cache`, `.mypy_cache`,
+   `.ruff_cache`, `.tox`, `node_modules`) are excluded by default, along with
+   `.DS_Store` files. Anything not on that list is shipped as-is.
 4. A self-contained wheel is built containing the tar blob, the checksum, and
    an `unpak-{folder}` console-script entry point.
 5. The wheel size is checked against PyPI's 100 MiB per-file limit, then
