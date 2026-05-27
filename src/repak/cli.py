@@ -8,7 +8,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from . import naming, pypi, snippet, versioning
+from . import __version__, naming, pypi, snippet, versioning
 from .archive import build_archive
 from .wheel import WheelTooLarge, build_wheel
 
@@ -42,6 +42,12 @@ def _parse_args(argv):
         prog="repak",
         description="Package a local directory as a synthetic PyPI wheel and "
         "upload it to public PyPI for transport into an isolated mirror.",
+    )
+    parser.add_argument(
+        "--version",
+        "-V",
+        action="version",
+        version=f"repak {__version__}",
     )
     parser.add_argument(
         "--path",
